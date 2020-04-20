@@ -1,34 +1,26 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
-import pickle
 import tensorflow as tf
-from flask import Flask, jsonify, request
+import flask
 from tensorflow.python.keras.models import model_from_json, Sequential, load_model
 from tensorflow.python.keras.optimizers import Adam, SGD, RMSprop
-from tensorflow.python.keras.layers import LSTM
-from tensorflow.python.keras.layers import GRU, Input, Dense, Flatten, Dropout
+from tensorflow.python.keras.layers import LSTM, Flatten, Dropout
 
-
-gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.config.experimental.set_virtual_device_configuration(
-    gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1750)])
-if 'session' in locals() and session is not None:
-    print('Close interactive session')
-    session.close()
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_virtual_device_configuration(
+#     gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=1750)])
+# if 'session' in locals() and session is not None:
+#     print('Close interactive session')
+#     session.close()
 
 # app
-app = Flask(__name__)
+app = flask.Flask(__name__, template_folder='templates')
+
+# Configure a secret SECRET_KEY
+#app.config[‘SECRET_KEY’] = ‘someRandomKey’
 
 # load model
 model = load_model('model2same.h5')
-#graph = tf.compat.v1.get_default_graph()
-
 
 accepted_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÁÅÑÒÖàáâãäåçèéêëìíîïñòóôõöøùúüýÿčńŌōŕřšūž–'
 word_vec_length = 25
@@ -38,8 +30,6 @@ char_to_int = dict((c, i) for i, c in enumerate(accepted_chars))
 int_to_char = dict((i, c) for i, c in enumerate(accepted_chars))
 
 # Removes all non accepted characters
-
-
 def normalize(line):
     return [c.lower() for c in line if c.lower() in accepted_chars]
 # Returns a list of n lists with n = word_vec_length
@@ -61,56 +51,47 @@ def name_encoding(name):
         onehot_encoded.append([0 for _ in range(char_vec_length)])
     return onehot_encoded
 
+@app.route('/', methods=['GET', 'POST'])
 
-# routes
-# @app.route('/predict', methods=['GET', 'POST'])
-@app.route('/', methods=['POST'])
-def predict():
-    # get data
-    data = (request.get_json(force=True))
-    print(data)
-    test = np.asarray([np.asarray(name_encoding(normalize(name)))
-                       for name in data]).astype(np.float32)
+def main():
+    if flask.request.method == 'GET':
+        # Just render the initial form, to get input
+        return(flask.render_template('main.html'))
+    
+    if flask.request.method == 'POST':
+        # Extract the input
+        name = flask.request.form['name']
+        data = [name]
 
-    result = model.predict(np.asarray(test))
-    print(result)
-    #output = int(result * 100)
-    output = {'reslut': int(result * 100)}
-    print(output)
+        test = np.asarray([np.asarray(name_encoding(normalize(name)))
+                           for name in data]).astype(np.float32)
 
-    temp = ''.join(data)
-    predictoin = np.squeeze(result * 100)
-    if predictoin > 50:
-        print("I am", predictoin, "sure", '"{}"'.format(temp), "is a name")
-    else:
-        print("I am", (100 - predictoin), '"{}"'.format(temp), "is a surname")
+        result = model.predict(np.asarray(test))
 
-    # return data
-    # return jsonify(results=output)
-    return jsonify(output)
+        temp = ''.join(data)
+        predictoin = np.squeeze(result * 100)
+        if predictoin > 50:
+            output = predictoin
+            res = "name"
+        else:
+            output = (100 - predictoin)
+            res = "surname"
 
-
+        return flask.render_template('main.html',
+                                     original_input={'name':name},
+                                     result='{} % sure it is a '.format(int(output))+res
+                                    )
+                                     
 if __name__ == '__main__':
-    app.run(port=5000, debug=False)
+
+    app.run()
 
 
-# In[ ]:
 
 
-# local url
-url = 'http://127.0.0.1:5000'  # change to your url
 
 
-# In[1]:
 
-
-# pip freeze > requirements.txt
-
-
-# In[ ]:
-
-
-# In[ ]:
 
 
 # kill -9 $(ps -A | grep python | awk '{print $1}')
