@@ -31,8 +31,8 @@ accepted_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÁÅÑÒ
 word_vec_length = 25
 char_vec_length = 95
 output_labels = 2
-char_to_int = dict((c, i) for i, c in enumerate(accepted_chars))
-int_to_char = dict((i, c) for i, c in enumerate(accepted_chars))
+char_to_int = {c: i for i, c in enumerate(accepted_chars)}
+int_to_char = {i: c for i, c in enumerate(accepted_chars)}
 
 # Removes all non accepted characters
 def normalize(line):
