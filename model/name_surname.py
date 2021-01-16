@@ -17,7 +17,7 @@ from tensorflow.python.keras.layers import Dense
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.models import load_model
 from tensorflow.python.keras.optimizers import Adam, SGD, RMSprop
-from tensorflow.python.keras.layers import LSTM, GRU, Input, Dense, Flatten, Dropout, BatchNormalization, Embedding
+from tensorflow.python.keras.layers import LSTM, GRU, Input, Flatten, Dropout, BatchNormalization, Embedding
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import train_test_split
 
