@@ -35,7 +35,7 @@ def name_encoding(name):
     integer_encoded = [char_to_int[char]
                        for i, char in enumerate(name) if i < word_vec_length]
     # Start one-hot-encoding
-    onehot_encoded = list()
+    onehot_encoded = []
     for value in integer_encoded:
         # create a list of n zeros, where n is equal to the number of accepted characters
         letter = [0 for _ in range(char_vec_length)]
