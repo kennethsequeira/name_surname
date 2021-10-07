@@ -154,11 +154,9 @@ result_nodup[result_nodup['Name'].str.len() < 2].index, inplace=True)
 
 
 onlyN = result_nodup.drop(columns=['label'])
-onlyN
 
 # Finding all characters
 all_chars = {c: (set(''.join(onlyN[c]))) for c in onlyN.columns}
-all_chars
 
 k = ['a',
      'b',
